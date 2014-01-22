@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ This file is protected by Copyright. Please refer to the COPYRIGHT file
+ distributed with this source distribution.
+
+ This file is part of REDHAWK.
+
+ REDHAWK is free software: you can redistribute it and/or modify it
+ under the terms of the GNU Lesser General Public License as published by the
+ Free Software Foundation, either version 3 of the License, or (at your
+ option) any later version.
+
+ REDHAWK is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+ for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program.  If not, see http://www.gnu.org/licenses/.
+-->
+
+<!DOCTYPE properties PUBLIC "-//JTRS//DTD SCA V2.2.2 PRF//EN" "properties.dtd">
+<properties>
+  <struct id="RBDS_Output" mode="readwrite">
+    <description>A structure representing the format of the output messages</description>
+    <simple id="Full_Text" type="string">
+      <description>The RadioText message</description>
+    </simple>
+    <simple id="Short_Text" type="string">
+      <description>The shorter, scrolling message</description>
+    </simple>
+    <simple id="Station_Type" type="string">
+      <description>The content type of the station (Top 40, Country, Rock, etc)</description>
+    </simple>
+    <simple id="Call_Sign" type="string">
+      <description>The call sign of the station</description>
+    </simple>
+    <simple id="PI_String" type="string">
+      <description>The Program Identification code of the currently playing program.  Can be used for Alternate Frequency applications</description>
+    </simple>
+    <simple id="Group" type="string">
+      <description>The group specifier, indicating the message content</description>
+    </simple>
+    <simple id="TextFlag" type="string">
+      <description>The group type specifier, which can be either A or B.  This switches to wipe the previous message contents</description>
+    </simple>
+    <configurationkind kindtype="message"/>
+  </struct>
+</properties>

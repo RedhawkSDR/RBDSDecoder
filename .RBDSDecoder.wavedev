@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ASCII"?>
+<codegen:WaveDevSettings xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:codegen="http://www.redhawk.gov/model/codegen">
+  <implSettings key="cpp">
+    <value outputDir="cpp" template="redhawk.codegen.jinja.cpp.component.pull" generatorId="gov.redhawk.ide.codegen.jinja.cplusplus.CplusplusGenerator" primary="true">
+      <generatedFileCRCs crc="1746641546" file="reconf"/>
+      <generatedFileCRCs crc="1324048894" file="RBDSDecoder_base.h"/>
+      <generatedFileCRCs crc="3065751510" file="RBDSDecoder_base.cpp"/>
+      <generatedFileCRCs crc="2752731334" file="port_impl.cpp"/>
+      <generatedFileCRCs crc="1942573142" file="struct_props.h"/>
+      <generatedFileCRCs crc="1505462100" file="RBDSDecoder.cpp"/>
+      <generatedFileCRCs crc="2765431347" file="RBDSDecoder.h"/>
+      <generatedFileCRCs crc="3408168321" file="../RBDSDecoder.spec"/>
+      <generatedFileCRCs crc="3077242067" file="port_impl.h"/>
+      <generatedFileCRCs crc="3180939462" file="configure.ac"/>
+      <generatedFileCRCs crc="864280150" file="build.sh"/>
+      <generatedFileCRCs crc="1410412525" file="main.cpp"/>
+      <generatedFileCRCs crc="2882359579" file="Makefile.am"/>
+    </value>
+  </implSettings>
+  <implSettings key="cpp_arm">
+    <value outputDir="cpp_arm" template="redhawk.codegen.jinja.cpp.component.pull" generatorId="gov.redhawk.ide.codegen.jinja.cplusplus.CplusplusGenerator"/>
+  </implSettings>
+</codegen:WaveDevSettings>
