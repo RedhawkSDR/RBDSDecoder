@@ -18,4 +18,4 @@ This work is protected by Copyright. Please refer to the [Copyright File](COPYRI
 
 ## License
 
-RBDSDecoder is licensed under the GNU Lesser General Public License (LGPL).
+RBDSDecoder is licensed under the GNU General Public License (GPL).
