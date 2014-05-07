@@ -32,85 +32,40 @@
 
 RBDSDecoder_base::RBDSDecoder_base(const char *uuid, const char *label) :
     Resource_impl(uuid, label),
-    serviceThread(0)
+    ThreadedComponent()
 {
-    construct();
+    loadProperties();
+
+    dataIn = new bulkio::InShortPort("dataIn");
+    addPort("dataIn", dataIn);
+    Message_Out = new MessageSupplierPort("Message_Out");
+    addPort("Message_Out", Message_Out);
 }
 
-void RBDSDecoder_base::construct()
+RBDSDecoder_base::~RBDSDecoder_base()
 {
-    Resource_impl::_started = false;
-    loadProperties();
-    serviceThread = 0;
-    
-    PortableServer::ObjectId_var oid;
-    dataIn = new bulkio::InShortPort("dataIn");
-    oid = ossie::corba::RootPOA()->activate_object(dataIn);
-    Message_Out = new ExtendedEvent_MessageEvent_Out_i("Message_Out");
-    oid = ossie::corba::RootPOA()->activate_object(Message_Out);
-
-    registerInPort(dataIn);
-    registerOutPort(Message_Out, Message_Out->_this());
+    delete dataIn;
+    dataIn = 0;
+    delete Message_Out;
+    Message_Out = 0;
 }
 
 /*******************************************************************************************
     Framework-level functions
     These functions are generally called by the framework to perform housekeeping.
 *******************************************************************************************/
-void RBDSDecoder_base::initialize() throw (CF::LifeCycle::InitializeError, CORBA::SystemException)
-{
-}
-
 void RBDSDecoder_base::start() throw (CORBA::SystemException, CF::Resource::StartError)
 {
-    boost::mutex::scoped_lock lock(serviceThreadLock);
-    if (serviceThread == 0) {
-        dataIn->unblock();
-        serviceThread = new ProcessThread<RBDSDecoder_base>(this, 0.1);
-        serviceThread->start();
-    }
-    
-    if (!Resource_impl::started()) {
-    	Resource_impl::start();
-    }
+    Resource_impl::start();
+    ThreadedComponent::startThread();
 }
 
 void RBDSDecoder_base::stop() throw (CORBA::SystemException, CF::Resource::StopError)
 {
-    boost::mutex::scoped_lock lock(serviceThreadLock);
-    // release the child thread (if it exists)
-    if (serviceThread != 0) {
-        dataIn->block();
-        if (!serviceThread->release(2)) {
-            throw CF::Resource::StopError(CF::CF_NOTSET, "Processing thread did not die");
-        }
-        serviceThread = 0;
+    Resource_impl::stop();
+    if (!ThreadedComponent::stopThread()) {
+        throw CF::Resource::StopError(CF::CF_NOTSET, "Processing thread did not die");
     }
-    
-    if (Resource_impl::started()) {
-    	Resource_impl::stop();
-    }
-}
-
-CORBA::Object_ptr RBDSDecoder_base::getPort(const char* _id) throw (CORBA::SystemException, CF::PortSupplier::UnknownPort)
-{
-
-    std::map<std::string, Port_Provides_base_impl *>::iterator p_in = inPorts.find(std::string(_id));
-    if (p_in != inPorts.end()) {
-        if (!strcmp(_id,"dataIn")) {
-            bulkio::InShortPort *ptr = dynamic_cast<bulkio::InShortPort *>(p_in->second);
-            if (ptr) {
-                return ptr->_this();
-            }
-        }
-    }
-
-    std::map<std::string, CF::Port_var>::iterator p_out = outPorts_var.find(std::string(_id));
-    if (p_out != outPorts_var.end()) {
-        return CF::Port::_duplicate(p_out->second);
-    }
-
-    throw (CF::PortSupplier::UnknownPort());
 }
 
 void RBDSDecoder_base::releaseObject() throw (CORBA::SystemException, CF::LifeCycle::ReleaseError)
@@ -121,13 +76,6 @@ void RBDSDecoder_base::releaseObject() throw (CORBA::SystemException, CF::LifeCy
     } catch (CF::Resource::StopError& ex) {
         // TODO - this should probably be logged instead of ignored
     }
-
-    // deactivate ports
-    releaseInPorts();
-    releaseOutPorts();
-
-    delete(dataIn);
-    delete(Message_Out);
 
     Resource_impl::releaseObject();
 }
@@ -144,3 +92,5 @@ void RBDSDecoder_base::loadProperties()
                 "message");
 
 }
+
+

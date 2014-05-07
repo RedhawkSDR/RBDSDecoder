@@ -38,7 +38,7 @@ else
         if [ -e build.sh ]; then
             ./build.sh $*
         elif [ -e reconf ]; then
-            ./reconf && ./configure && make
+            ./reconf && ./configure && make $*
         else
             echo "No build.sh found for $impl"
         fi

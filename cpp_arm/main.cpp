@@ -22,11 +22,10 @@
 #include "ossie/ossieSupport.h"
 
 #include "RBDSDecoder.h"
-
-
 int main(int argc, char* argv[])
 {
     RBDSDecoder_i* RBDSDecoder_servant;
     Resource_impl::start_component(RBDSDecoder_servant, argc, argv);
     return 0;
 }
+

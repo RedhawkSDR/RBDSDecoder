@@ -28,7 +28,6 @@
 *******************************************************************************************/
 
 #include <ossie/CorbaUtils.h>
-#include <ossie/PropertyInterface.h>
 
 struct RBDS_Output_struct {
     RBDS_Output_struct ()
@@ -56,22 +55,22 @@ inline bool operator>>= (const CORBA::Any& a, RBDS_Output_struct& s) {
         if (!strcmp("Full_Text", props[idx].id)) {
             if (!(props[idx].value >>= s.Full_Text)) return false;
         }
-        if (!strcmp("Short_Text", props[idx].id)) {
+        else if (!strcmp("Short_Text", props[idx].id)) {
             if (!(props[idx].value >>= s.Short_Text)) return false;
         }
-        if (!strcmp("Station_Type", props[idx].id)) {
+        else if (!strcmp("Station_Type", props[idx].id)) {
             if (!(props[idx].value >>= s.Station_Type)) return false;
         }
-        if (!strcmp("Call_Sign", props[idx].id)) {
+        else if (!strcmp("Call_Sign", props[idx].id)) {
             if (!(props[idx].value >>= s.Call_Sign)) return false;
         }
-        if (!strcmp("PI_String", props[idx].id)) {
+        else if (!strcmp("PI_String", props[idx].id)) {
             if (!(props[idx].value >>= s.PI_String)) return false;
         }
-        if (!strcmp("Group", props[idx].id)) {
+        else if (!strcmp("Group", props[idx].id)) {
             if (!(props[idx].value >>= s.Group)) return false;
         }
-        if (!strcmp("TextFlag", props[idx].id)) {
+        else if (!strcmp("TextFlag", props[idx].id)) {
             if (!(props[idx].value >>= s.TextFlag)) return false;
         }
     }
@@ -120,25 +119,4 @@ inline bool operator!= (const RBDS_Output_struct& s1, const RBDS_Output_struct& 
     return !(s1==s2);
 };
 
-template<> inline short StructProperty<RBDS_Output_struct>::compare (const CORBA::Any& a) {
-    if (super::isNil_) {
-        if (a.type()->kind() == (CORBA::tk_null)) {
-            return 0;
-        }
-        return 1;
-    }
-
-    RBDS_Output_struct tmp;
-    if (fromAny(a, tmp)) {
-        if (tmp != this->value_) {
-            return 1;
-        }
-
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
-
-#endif
+#endif // STRUCTPROPS_H

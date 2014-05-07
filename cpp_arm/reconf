@@ -44,3 +44,4 @@ fi
 
 autoconf
 automake --foreign --add-missing
+

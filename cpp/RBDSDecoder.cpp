@@ -43,7 +43,7 @@ RBDSDecoder_i::RBDSDecoder_i(const char *uuid, const char *label) :
 {
 	//Sets Debug level so that the LOG_INFO does not display. Set this to
 	//3 or above to view LOG_INFO
-	LoggingConfigurator::configure(2);
+	setLogLevel("RBDSDecoder_i", 2);
 
 	//set callMap for 3 letter callsigns
 	set_call_map();
