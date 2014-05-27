@@ -31,7 +31,7 @@ Prefix:         %{_prefix}
 %define _infodir       %{_prefix}/info
 
 Name:           RBDSDecoder
-Version:        1.0.0
+Version:        1.0.0dev0
 Release:        1%{?dist}
 Summary:        Component %{name}
 
@@ -63,14 +63,6 @@ pushd cpp
 %configure
 make %{?_smp_mflags}
 popd
-# Implementation cpp_arm
-pushd cpp_arm
-./reconf
-%define _bindir %{_prefix}/dom/components/RBDSDecoder/cpp_arm
-%configure
-make %{?_smp_mflags}
-popd
-
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -79,12 +71,6 @@ pushd cpp
 %define _bindir %{_prefix}/dom/components/RBDSDecoder/cpp
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
-# Implementation cpp_arm
-pushd cpp_arm
-%define _bindir %{_prefix}/dom/components/RBDSDecoder/cpp_arm
-make install DESTDIR=$RPM_BUILD_ROOT
-popd
-
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -97,5 +83,4 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/dom/components/%{name}/RBDSDecoder.prf.xml
 %{_prefix}/dom/components/%{name}/RBDSDecoder.spd.xml
 %{_prefix}/dom/components/%{name}/cpp
-%{_prefix}/dom/components/%{name}/cpp_arm
 

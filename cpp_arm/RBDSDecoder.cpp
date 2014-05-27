@@ -43,7 +43,7 @@ RBDSDecoder_i::RBDSDecoder_i(const char *uuid, const char *label) :
 {
 	//Sets Debug level so that the LOG_INFO does not display. Set this to
 	//3 or above to view LOG_INFO
-	setLogLevel(uuid, 2);
+	setLogLevel("RBDSDecoder_i", 2);
 
 	//set callMap for 3 letter callsigns
 	set_call_map();
@@ -56,7 +56,7 @@ RBDSDecoder_i::~RBDSDecoder_i()
 
 int RBDSDecoder_i::serviceFunction()
 {
-	bulkio::InShortPort::dataTransfer * input = dataIn->getPacket(-1);
+	bulkio::InShortPort::dataTransfer * input = dataShort_in->getPacket(-1);
 
 	if (not input) {
 		return NOOP;
@@ -405,7 +405,7 @@ void RBDSDecoder_i::decode_type0(unsigned int* group, bool version_code) {
 	mess.Station_Type = pty_table[program_type];
 	mess.Group = groupID;
 	mess.TextFlag = radiotext_flag;
-	Message_Out->sendMessage(mess);
+	messageEvent_out->sendMessage(mess);
 
 	LOG_INFO(RBDSDecoder_i, "\nmess.Call_Sign = " << mess.Call_Sign << "\nmess.PI_String = " << mess.PI_String
 			<< "\nmess.Short_Text = " << mess.Short_Text << "\nmess.Full_Text = " << mess.Full_Text
@@ -450,7 +450,7 @@ void RBDSDecoder_i::decode_type2(unsigned int* group, bool version_code) {
 	mess.Station_Type = pty_table[program_type];
 	mess.Group = groupID;
 	mess.TextFlag = radiotext_AB_flag ? 'B' : 'A';
-	Message_Out->sendMessage(mess);
+	messageEvent_out->sendMessage(mess);
 
 	LOG_INFO(RBDSDecoder_i, "\nmess.Call_Sign = " << mess.Call_Sign << "\nmess.PI_String = " << mess.PI_String
 			<< "\nmess.Short_Text = " << mess.Short_Text << "\nmess.Full_Text = " << mess.Full_Text

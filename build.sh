@@ -24,9 +24,9 @@ if [ "$1" = "rpm" ]; then
     if [ -e RBDSDecoder.spec ]; then
         mydir=`dirname $0`
         tmpdir=`mktemp -d`
-        cp -r ${mydir} ${tmpdir}/RBDSDecoder-1.0.0
-        tar czf ${tmpdir}/RBDSDecoder-1.0.0.tar.gz --exclude=".svn" -C ${tmpdir} RBDSDecoder-1.0.0
-        rpmbuild -ta ${tmpdir}/RBDSDecoder-1.0.0.tar.gz
+        cp -r ${mydir} ${tmpdir}/RBDSDecoder-1.0.0dev0
+        tar czf ${tmpdir}/RBDSDecoder-1.0.0dev0.tar.gz --exclude=".svn" -C ${tmpdir} RBDSDecoder-1.0.0dev0
+        rpmbuild -ta ${tmpdir}/RBDSDecoder-1.0.0dev0.tar.gz
         rm -rf $tmpdir
     else
         echo "Missing RPM spec file in" `pwd`

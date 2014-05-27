@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
-
 #ifndef RBDSDECODER_IMPL_BASE_H
 #define RBDSDECODER_IMPL_BASE_H
 
@@ -48,8 +47,8 @@ class RBDSDecoder_base : public Resource_impl, protected ThreadedComponent
         RBDS_Output_struct RBDS_Output;
 
         // Ports
-        bulkio::InShortPort *dataIn;
-        MessageSupplierPort *Message_Out;
+        bulkio::InShortPort *dataShort_in;
+        MessageSupplierPort *messageEvent_out;
 
     private:
 };

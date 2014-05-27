@@ -18,7 +18,6 @@
  You should have received a copy of the GNU Lesser General Public License
  along with this program.  If not, see http://www.gnu.org/licenses/.
 -->
-
 <!DOCTYPE softwarecomponent PUBLIC "-//JTRS//DTD SCA V2.2.2 SCD//EN" "softwarecomponent.dtd">
 <softwarecomponent>
   <corbaversion>2.2</corbaversion>
@@ -31,10 +30,10 @@
     <supportsinterface repid="IDL:CF/PropertySet:1.0" supportsname="PropertySet"/>
     <supportsinterface repid="IDL:CF/TestableObject:1.0" supportsname="TestableObject"/>
     <ports>
-      <provides repid="IDL:BULKIO/dataShort:1.0" providesname="dataIn">
+      <provides repid="IDL:BULKIO/dataShort:1.0" providesname="dataShort_in">
         <porttype type="data"/>
       </provides>
-      <uses repid="IDL:ExtendedEvent/MessageEvent:1.0" usesname="Message_Out">
+      <uses repid="IDL:ExtendedEvent/MessageEvent:1.0" usesname="messageEvent_out">
         <porttype type="data"/>
       </uses>
     </ports>

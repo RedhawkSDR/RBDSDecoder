@@ -8,7 +8,5 @@ redhawk_SOURCES_auto += RBDSDecoder.h
 redhawk_SOURCES_auto += RBDSDecoder_base.cpp
 redhawk_SOURCES_auto += RBDSDecoder_base.h
 redhawk_SOURCES_auto += main.cpp
-redhawk_SOURCES_auto += port_impl.cpp
-redhawk_SOURCES_auto += port_impl.h
 redhawk_SOURCES_auto += rds_constants.h
 redhawk_SOURCES_auto += struct_props.h

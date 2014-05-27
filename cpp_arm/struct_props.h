@@ -1,23 +1,3 @@
-/*
- * This file is protected by Copyright. Please refer to the COPYRIGHT file
- * distributed with this source distribution.
-
- * This file is part of RBDSDecoder.
-
- * RBDSDecoder is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
-
- * RBDSDecoder is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see http://www.gnu.org/licenses/.
- */
-
 #ifndef STRUCTPROPS_H
 #define STRUCTPROPS_H
 
@@ -52,25 +32,25 @@ inline bool operator>>= (const CORBA::Any& a, RBDS_Output_struct& s) {
     if (!(a >>= temp)) return false;
     CF::Properties& props = *temp;
     for (unsigned int idx = 0; idx < props.length(); idx++) {
-        if (!strcmp("Full_Text", props[idx].id)) {
+        if (!strcmp("RBDS_Output::Full_Text", props[idx].id)) {
             if (!(props[idx].value >>= s.Full_Text)) return false;
         }
-        else if (!strcmp("Short_Text", props[idx].id)) {
+        else if (!strcmp("RBDS_Output::Short_Text", props[idx].id)) {
             if (!(props[idx].value >>= s.Short_Text)) return false;
         }
-        else if (!strcmp("Station_Type", props[idx].id)) {
+        else if (!strcmp("RBDS_Output::Station_Type", props[idx].id)) {
             if (!(props[idx].value >>= s.Station_Type)) return false;
         }
-        else if (!strcmp("Call_Sign", props[idx].id)) {
+        else if (!strcmp("RBDS_Output::Call_Sign", props[idx].id)) {
             if (!(props[idx].value >>= s.Call_Sign)) return false;
         }
-        else if (!strcmp("PI_String", props[idx].id)) {
+        else if (!strcmp("RBDS_Output::PI_String", props[idx].id)) {
             if (!(props[idx].value >>= s.PI_String)) return false;
         }
-        else if (!strcmp("Group", props[idx].id)) {
+        else if (!strcmp("RBDS_Output::Group", props[idx].id)) {
             if (!(props[idx].value >>= s.Group)) return false;
         }
-        else if (!strcmp("TextFlag", props[idx].id)) {
+        else if (!strcmp("RBDS_Output::TextFlag", props[idx].id)) {
             if (!(props[idx].value >>= s.TextFlag)) return false;
         }
     }
@@ -80,19 +60,19 @@ inline bool operator>>= (const CORBA::Any& a, RBDS_Output_struct& s) {
 inline void operator<<= (CORBA::Any& a, const RBDS_Output_struct& s) {
     CF::Properties props;
     props.length(7);
-    props[0].id = CORBA::string_dup("Full_Text");
+    props[0].id = CORBA::string_dup("RBDS_Output::Full_Text");
     props[0].value <<= s.Full_Text;
-    props[1].id = CORBA::string_dup("Short_Text");
+    props[1].id = CORBA::string_dup("RBDS_Output::Short_Text");
     props[1].value <<= s.Short_Text;
-    props[2].id = CORBA::string_dup("Station_Type");
+    props[2].id = CORBA::string_dup("RBDS_Output::Station_Type");
     props[2].value <<= s.Station_Type;
-    props[3].id = CORBA::string_dup("Call_Sign");
+    props[3].id = CORBA::string_dup("RBDS_Output::Call_Sign");
     props[3].value <<= s.Call_Sign;
-    props[4].id = CORBA::string_dup("PI_String");
+    props[4].id = CORBA::string_dup("RBDS_Output::PI_String");
     props[4].value <<= s.PI_String;
-    props[5].id = CORBA::string_dup("Group");
+    props[5].id = CORBA::string_dup("RBDS_Output::Group");
     props[5].value <<= s.Group;
-    props[6].id = CORBA::string_dup("TextFlag");
+    props[6].id = CORBA::string_dup("RBDS_Output::TextFlag");
     props[6].value <<= s.TextFlag;
     a <<= props;
 };

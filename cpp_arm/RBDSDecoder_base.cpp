@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
-
 #include "RBDSDecoder_base.h"
 
 /*******************************************************************************************
@@ -36,18 +35,18 @@ RBDSDecoder_base::RBDSDecoder_base(const char *uuid, const char *label) :
 {
     loadProperties();
 
-    dataIn = new bulkio::InShortPort("dataIn");
-    addPort("dataIn", dataIn);
-    Message_Out = new MessageSupplierPort("Message_Out");
-    addPort("Message_Out", Message_Out);
+    dataShort_in = new bulkio::InShortPort("dataShort_in");
+    addPort("dataShort_in", dataShort_in);
+    messageEvent_out = new MessageSupplierPort("messageEvent_out");
+    addPort("messageEvent_out", messageEvent_out);
 }
 
 RBDSDecoder_base::~RBDSDecoder_base()
 {
-    delete dataIn;
-    dataIn = 0;
-    delete Message_Out;
-    Message_Out = 0;
+    delete dataShort_in;
+    dataShort_in = 0;
+    delete messageEvent_out;
+    messageEvent_out = 0;
 }
 
 /*******************************************************************************************
@@ -85,7 +84,7 @@ void RBDSDecoder_base::loadProperties()
     addProperty(RBDS_Output,
                 RBDS_Output_struct(),
                 "RBDS_Output",
-                "",
+                "RBDS_Output",
                 "readwrite",
                 "",
                 "external",

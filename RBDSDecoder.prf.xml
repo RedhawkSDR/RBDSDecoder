@@ -18,30 +18,29 @@
  You should have received a copy of the GNU Lesser General Public License
  along with this program.  If not, see http://www.gnu.org/licenses/.
 -->
-
 <!DOCTYPE properties PUBLIC "-//JTRS//DTD SCA V2.2.2 PRF//EN" "properties.dtd">
 <properties>
-  <struct id="RBDS_Output" mode="readwrite">
+  <struct id="RBDS_Output" mode="readwrite" name="RBDS_Output">
     <description>A structure representing the format of the output messages</description>
-    <simple id="Full_Text" type="string">
+    <simple id="RBDS_Output::Full_Text" name="Full_Text" type="string">
       <description>The RadioText message</description>
     </simple>
-    <simple id="Short_Text" type="string">
+    <simple id="RBDS_Output::Short_Text" name="Short_Text" type="string">
       <description>The shorter, scrolling message</description>
     </simple>
-    <simple id="Station_Type" type="string">
+    <simple id="RBDS_Output::Station_Type" name="Station_Type" type="string">
       <description>The content type of the station (Top 40, Country, Rock, etc)</description>
     </simple>
-    <simple id="Call_Sign" type="string">
+    <simple id="RBDS_Output::Call_Sign" name="Call_Sign" type="string">
       <description>The call sign of the station</description>
     </simple>
-    <simple id="PI_String" type="string">
+    <simple id="RBDS_Output::PI_String" name="PI_String" type="string">
       <description>The Program Identification code of the currently playing program.  Can be used for Alternate Frequency applications</description>
     </simple>
-    <simple id="Group" type="string">
+    <simple id="RBDS_Output::Group" name="Group" type="string">
       <description>The group specifier, indicating the message content</description>
     </simple>
-    <simple id="TextFlag" type="string">
+    <simple id="RBDS_Output::TextFlag" name="TextFlag" type="string">
       <description>The group type specifier, which can be either A or B.  This switches to wipe the previous message contents</description>
     </simple>
     <configurationkind kindtype="message"/>
