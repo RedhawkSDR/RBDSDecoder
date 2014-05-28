@@ -111,7 +111,7 @@ def main():
 	# input of the RBDSDecoder.  Connect the output of the 
 	# RBDSDecoder to the input of the message sink
 	display(f, "\n***** Creating Connections *****")
-	binarySource.connect(test_component, providesPortName='dataIn')
+	binarySource.connect(test_component, providesPortName='dataShort_in')
 	test_component.connect(messageSink, providesPortName='msgIn')
 	display(f, "Connections created")
 
