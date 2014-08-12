@@ -2,7 +2,7 @@
 # This file is protected by Copyright. Please refer to the COPYRIGHT file
 # distributed with this source distribution.
 #
-# This file is part of REDHAWK.
+# This file is part of REDHAWK RBDSDecoder.
 #
 # REDHAWK is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by the
@@ -31,12 +31,12 @@ Prefix:         %{_prefix}
 %define _infodir       %{_prefix}/info
 
 Name:           RBDSDecoder
-Version:        1.0.0dev0
+Version:        1.0.0
 Release:        1%{?dist}
 Summary:        Component %{name}
 
 Group:          REDHAWK/Components
-License:        None
+License:        LGPLv3+
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -49,6 +49,8 @@ Requires:       bulkioInterfaces >= 1.10
 
 %description
 Component %{name}
+ * Commit: __REVISION__
+ * Source Date/Time: __DATETIME__
 
 
 %prep
