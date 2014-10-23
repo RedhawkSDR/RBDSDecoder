@@ -407,6 +407,16 @@ void RBDSDecoder_i::decode_type0(unsigned int* group, bool version_code) {
 	mess.TextFlag = radiotext_flag;
 	messageEvent_out->sendMessage(mess);
 
+	// Set the component's property so the data
+	// can be seen in the IDE
+	RBDS_Output.Call_Sign = callsign;
+	RBDS_Output.PI_String = pistring;
+	RBDS_Output.Short_Text = program_service_name;
+	RBDS_Output.Full_Text = radiotext;
+	RBDS_Output.Station_Type = pty_table[program_type];
+	RBDS_Output.Group = groupID;
+	RBDS_Output.TextFlag = radiotext_flag;
+
 	LOG_INFO(RBDSDecoder_i, "\nmess.Call_Sign = " << mess.Call_Sign << "\nmess.PI_String = " << mess.PI_String
 			<< "\nmess.Short_Text = " << mess.Short_Text << "\nmess.Full_Text = " << mess.Full_Text
 			<< "\nmess.Station_Type = " << mess.Station_Type << "\nmess.Group = " << mess.Group
@@ -451,6 +461,16 @@ void RBDSDecoder_i::decode_type2(unsigned int* group, bool version_code) {
 	mess.Group = groupID;
 	mess.TextFlag = radiotext_AB_flag ? 'B' : 'A';
 	messageEvent_out->sendMessage(mess);
+
+	// Set the component's property so the data
+	// can be seen in the IDE
+	RBDS_Output.Call_Sign = callsign;
+	RBDS_Output.PI_String = pistring;
+	RBDS_Output.Short_Text = program_service_name;
+	RBDS_Output.Full_Text = radiotext;
+	RBDS_Output.Station_Type = pty_table[program_type];
+	RBDS_Output.Group = groupID;
+	RBDS_Output.TextFlag = radiotext_flag;
 
 	LOG_INFO(RBDSDecoder_i, "\nmess.Call_Sign = " << mess.Call_Sign << "\nmess.PI_String = " << mess.PI_String
 			<< "\nmess.Short_Text = " << mess.Short_Text << "\nmess.Full_Text = " << mess.Full_Text

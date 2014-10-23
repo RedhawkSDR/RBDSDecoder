@@ -89,7 +89,7 @@ void RBDSDecoder_base::loadProperties()
                 "readwrite",
                 "",
                 "external",
-                "message");
+                "message,configure");
 
 }
 
