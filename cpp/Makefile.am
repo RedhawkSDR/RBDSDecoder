@@ -19,7 +19,7 @@
 #
 
 ossieName = RBDSDecoder
-bindir = $(prefix)/dom/components/RBDSDecoder/cpp/
+bindir = $(prefix)/dom/components/RBDSDecoder/cpp$(BINDIR_SUFFIX)/
 bin_PROGRAMS = RBDSDecoder
 
 xmldir = $(prefix)/dom/components/RBDSDecoder/
@@ -46,6 +46,8 @@ distclean-local:
 include $(srcdir)/Makefile.am.ide
 RBDSDecoder_SOURCES = $(redhawk_SOURCES_auto)
 RBDSDecoder_LDADD = $(PROJECTDEPS_LIBS) $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB) $(BOOST_REGEX_LIB) $(BOOST_SYSTEM_LIB) $(INTERFACEDEPS_LIBS) $(redhawk_LDADD_auto)
-RBDSDecoder_CXXFLAGS = -Wall $(PROJECTDEPS_CFLAGS) $(BOOST_CPPFLAGS) $(INTERFACEDEPS_CFLAGS) $(redhawk_INCLUDES_auto)
+
+RBDSDecoder_CXXFLAGS = -Wall $(PROJECTDEPS_CFLAGS) $(BOOST_CPPFLAGS) $(INTERFACEDEPS_CFLAGS) $(redhawk_INCLUDES_auto) $(CPU_SPECIFIC_FLAGS)
+
 RBDSDecoder_LDFLAGS = -Wall $(redhawk_LDFLAGS_auto)
 
