@@ -17,7 +17,4 @@
       <generatedFileCRCs crc="2882359579" file="Makefile.am"/>
     </value>
   </implSettings>
-  <implSettings key="cpp_arm">
-    <value outputDir="cpp_arm" template="redhawk.codegen.jinja.cpp.component.pull" generatorId="gov.redhawk.ide.codegen.jinja.cplusplus.CplusplusGenerator"/>
-  </implSettings>
 </codegen:WaveDevSettings>
