@@ -43,7 +43,7 @@ const std::string pty_table[32]={
 "Soft",
 "Nostalgia",
 "Jazz",
-"Clasical",
+"Classical",
 "Rhythm_and_Blues",
 "Soft_R_&_B",
 "Foreign_Language",
