@@ -44,6 +44,5 @@
       <description>The group type specifier, which can be either A or B.  This switches to wipe the previous message contents</description>
     </simple>
     <configurationkind kindtype="message"/>
-    <configurationkind kindtype="configure"/>
   </struct>
 </properties>
