@@ -89,7 +89,7 @@ class RBDSDecoder_i : public RBDSDecoder_base
     	void decode_type15b(unsigned int*);
     	void decode_callsign(unsigned int);
     	void set_call_map();
-    	void send_message();
+    	void send_message(char type, bool version_code);
     	void decode_optional_content(int no_groups, unsigned long int *free_format);
 
         // Function to get an SRI keyword value

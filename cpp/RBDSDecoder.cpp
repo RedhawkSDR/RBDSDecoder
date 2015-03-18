@@ -52,14 +52,18 @@ RBDSDecoder_i::RBDSDecoder_i(const char *uuid, const char *label) :
 RBDSDecoder_i::~RBDSDecoder_i() {
 }
 
-void RBDSDecoder_i::send_message() {
+void RBDSDecoder_i::send_message(char type, bool version_code) {
 	RBDS_Output_struct mess;
-	mess.Call_Sign = callsign;
-	mess.PI_String = pistring;
-	mess.Short_Text = program_service_name;
-	mess.Full_Text = radiotext;
+	mess.Call_Sign = std::string(callsign, 4);
+	mess.PI_String = std::string(pistring, 3);
+	mess.Short_Text = std::string(program_service_name, 8);
+	mess.Full_Text = std::string(radiotext, 64);
 	mess.Station_Type = pty_table[program_type];
-	mess.Group = groupID;
+	groupID[0] = type;
+	groupID[1] = version_code ? 'B' : 'A';
+	groupID[2] = NULL;
+
+	mess.Group = std::string(groupID, 2);
 	mess.TextFlag = radiotext_flag ? 'B' : 'A';
 	messageEvent_out->sendMessage(mess);
 }
@@ -292,14 +296,12 @@ void RBDSDecoder_i::decode_group(unsigned int* group) {
 	program_identification = group[0];                        // "PI"
 	program_type = (group[1] >> 5) & 0x1f;                        // "PTY"
 
-
 	decode_callsign(program_identification);
 
 	int pi_country_identification = (program_identification >> 12) & 0xf;
 	int pi_area_coverage = (program_identification >> 8) & 0xf;
 
 	unsigned char pi_program_reference_number = program_identification & 0xff;
-	char pistring[5];
 
     sprintf(pistring,"%04X",program_identification);
 //    send_message(0,pistring);
@@ -440,7 +442,7 @@ void RBDSDecoder_i::decode_type0(unsigned int* group, bool version_code) {
 		}
 	}
 
-	send_message();
+	send_message('0', version_code);
 }
 
 void RBDSDecoder_i::decode_type1(unsigned int* group, bool version_code) {
@@ -520,7 +522,7 @@ void RBDSDecoder_i::decode_type2(unsigned int* group, bool version_code) {
 		radiotext[text_segment_address_code * 2 + 1] = group[3] & 0xff;
 	}
 //    send_message(4,radiotext);
-    send_message();
+    send_message('2', version_code);
 }
 
 void RBDSDecoder_i::decode_type3a(unsigned int* group) {
