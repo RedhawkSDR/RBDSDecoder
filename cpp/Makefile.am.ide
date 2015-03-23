@@ -3,10 +3,20 @@
 # and choosing Resource Configurations -> Exclude from build. Re-include files
 # by opening the Properties dialog of your project and choosing C/C++ Build ->
 # Tool Chain Editor, and un-checking "Exclude resource from build "
-redhawk_SOURCES_auto = RBDSDecoder.cpp
+redhawk_SOURCES_auto = EventingInterface.h
+redhawk_SOURCES_auto += LoggingInterface.h
+redhawk_SOURCES_auto += RBDSDecoder.cpp
 redhawk_SOURCES_auto += RBDSDecoder.h
 redhawk_SOURCES_auto += RBDSDecoder_base.cpp
 redhawk_SOURCES_auto += RBDSDecoder_base.h
+redhawk_SOURCES_auto += gr-rds/constants.h
+redhawk_SOURCES_auto += gr-rds/decoder_impl.cc
+redhawk_SOURCES_auto += gr-rds/decoder_impl.h
+redhawk_SOURCES_auto += gr-rds/parser_impl.cc
+redhawk_SOURCES_auto += gr-rds/parser_impl.h
+redhawk_SOURCES_auto += gr-rds/tmc_events.h
 redhawk_SOURCES_auto += main.cpp
+redhawk_SOURCES_auto += port_impl.cpp
+redhawk_SOURCES_auto += port_impl.h
 redhawk_SOURCES_auto += rds_constants.h
 redhawk_SOURCES_auto += struct_props.h

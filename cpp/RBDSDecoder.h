@@ -22,75 +22,31 @@
 #define RBDSDECODER_IMPL_H
 
 #include "RBDSDecoder_base.h"
-//#include "tmc_events.h"
+#include "EventingInterface.h"
+#include "LoggingInterface.h"
+#include "gr-rds/decoder_impl.h"
+#include "rds_constants.h"
 
 class RBDSDecoder_i;
+using namespace GenericInterface;
 
-class RBDSDecoder_i : public RBDSDecoder_base
+class RBDSDecoder_i : public RBDSDecoder_base, public virtual EventingInterface, public virtual LoggingInterface
 {
     ENABLE_LOGGING
     public: 
         RBDSDecoder_i(const char *uuid, const char *label);
         ~RBDSDecoder_i();
         int serviceFunction();
+        void log(enum LoggingInterface::LEVEL level, std::string msg);
+        void sendMessage(enum TYPE eventType, std::string groupType, std::string msg);
         void reset(void);
     private:
-    	unsigned long bit_counter, lastseen_offset_counter, reg;
-    	unsigned char lastseen_offset, block_number;
-    	unsigned int block_bit_counter, wrong_blocks_counter, blocks_counter, group_good_blocks_counter;
-    	bool presync, good_block, group_assembly_started;
-
-    	unsigned int group[4];
-    	enum state_t {
-    		ST_NO_SYNC, ST_SYNC
-    	};
-    	state_t d_state;
     	long chanrf, colrf;
-    	char clocktime_string[33];
-    	char radiotext[65];
-    	char af1_string[10];
-    	char af2_string[10];
-    	char af_string[21];
-    	char pistring[5];
-    	char groupID[3];
-    	char radiotext_flag;
-    	char pi_country_identification;
-    	char pi_area_coverage;
-    	char pi_program_reference_number;
-    	bool radiotext_AB_flag;
-    	bool traffic_program;
-    	bool traffic_announcement;
-    	bool music_speech;
-    	bool mono_stereo;
-    	bool artificial_head;
-    	bool compressed;
-    	bool static_pty;
-    	unsigned char program_type;
-    	unsigned int program_identification;
-    	char program_service_name[9];
-    	char callsign[5];
-
-    	std::map<unsigned int, std::string> callMap;
-
-    	void enter_no_sync();
     	void checkForFreqChange(BULKIO::StreamSRI &sri);
-    	void enter_sync(unsigned int);
-    	void reset_rds_data();
-    	unsigned int calc_syndrome(unsigned long, unsigned char);
-    	void decode_group(unsigned int*);
-    	double decode_af(unsigned int);
-    	void decode_type0(unsigned int*, bool);
-    	void decode_type1(unsigned int*, bool);
-    	void decode_type2(unsigned int*, bool);
-    	void decode_type3a(unsigned int*);
-    	void decode_type4a(unsigned int*);
-    	void decode_type8a(unsigned int*);
-    	void decode_type14(unsigned int*, bool);
-    	void decode_type15b(unsigned int*);
-    	void decode_callsign(unsigned int);
-    	void set_call_map();
     	void send_message(char type, bool version_code);
-    	void decode_optional_content(int no_groups, unsigned long int *free_format);
+    	decoder_impl decoder;
+    	std::string m_alt_freq, m_clock_time, m_flag_string, m_ps, m_radio_text, m_pi_txt;
+    	unsigned int m_pty, m_pi;
 
         // Function to get an SRI keyword value
         template <typename TYPE> TYPE getKeywordByID(BULKIO::StreamSRI &sri, CORBA::String_member id, bool &valid) {
@@ -127,8 +83,6 @@ class RBDSDecoder_i : public RBDSDecoder_base
                 }
                 return value;
         }
-
-
 };
 
 #endif
