@@ -26,7 +26,7 @@
 #include "EventingInterface.h"
 #include "LoggingInterface.h"
 #include "gr-rds/decoder_impl.h"
-#include "rds_constants.h"
+#include "rbds_constants.h"
 
 class RBDSDecoder_i;
 using namespace GenericInterface;

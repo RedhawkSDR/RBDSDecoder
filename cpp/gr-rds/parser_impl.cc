@@ -557,14 +557,17 @@ void parser_impl::parse(unsigned int * group) {
 	int pi_country_identification = (program_identification >> 12) & 0xf;
 	int pi_area_coverage = (program_identification >> 8) & 0xf;
 	unsigned char pi_program_reference_number = program_identification & 0xff;
-	std::stringstream ss;
-	ss << program_identification;
-	std::string pistring = ss.str();
-	LOG(LoggingInterface::FATAL, "program_identification: " << program_identification);
-	eventServer->sendMessage(EventingInterface::PI, type_string, pistring);
-	eventServer->sendMessage(EventingInterface::PTY, type_string, pty_table[program_type]);
+	std::stringstream pi_ss;
+	pi_ss << program_identification;
 
-	LOG(LoggingInterface::TRACE, " - PI:" << pistring << " - " << "PTY:" << pty_table[program_type]
+	std::stringstream pty_ss;
+	pty_ss << (unsigned int) program_type;
+
+	LOG(LoggingInterface::TRACE, "program_identification: " << program_identification);
+	eventServer->sendMessage(EventingInterface::PI, type_string, pi_ss.str());
+	eventServer->sendMessage(EventingInterface::PTY, type_string, pty_ss.str());
+
+	LOG(LoggingInterface::TRACE, " - PI:" << pi_ss.str() << " - " << "PTY:" << program_type
 	<< " (country:" << pi_country_codes[pi_country_identification - 1][0]
 	<< "/" << pi_country_codes[pi_country_identification - 1][1]
 	<< "/" << pi_country_codes[pi_country_identification - 1][2]

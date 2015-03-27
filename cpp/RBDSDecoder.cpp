@@ -19,7 +19,6 @@
  */
 
 #include "RBDSDecoder.h"
-#include "rds_constants.h"
 
 PREPARE_LOGGING(RBDSDecoder_i)
 
@@ -60,7 +59,6 @@ void RBDSDecoder_i::sendMessage(enum TYPE eventType, std::string groupType, std:
 		try {
 			m_pi_txt = msg;
 			m_pi = atoi(msg.c_str());
-			LOG_FATAL(RBDSDecoder_i, "Converted m_pi:" << m_pi)
 		} catch(std::exception const & e) {
 			LOG_ERROR(RBDSDecoder_i, "Error converting PTY from string to int");
 		}

@@ -18,5 +18,5 @@ redhawk_SOURCES_auto += gr-rds/tmc_events.h
 redhawk_SOURCES_auto += main.cpp
 redhawk_SOURCES_auto += port_impl.cpp
 redhawk_SOURCES_auto += port_impl.h
-redhawk_SOURCES_auto += rds_constants.h
+redhawk_SOURCES_auto += rbds_constants.h
 redhawk_SOURCES_auto += struct_props.h
