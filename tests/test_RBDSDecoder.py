@@ -375,9 +375,9 @@ def main():
 					type_A_group_num_message = "Expected Group %s on group number %d, received Group %s" % (expected, count, item.value.value())
 		count += 1
 
-	if count != 32:
+	if count != 112:
 		type_A_count_test = False
-		type_A_count_message = "Expected 32 Groups, received %d" % count
+		type_A_count_message = "Expected 112 messages, received %d" % count
 
 	responses = []
 
@@ -444,9 +444,9 @@ def main():
 					type_B_group_num_message = "Expected Group %s on group number %d, received Group %s" % (expected, count, item.value.value())
 		count += 1
 
-	if count != 32:
+	if count != 112:
 		type_B_count_test = False
-		type_B_count_message = "Expected 32 Groups, received %d" % count
+		type_B_count_message = "Expected 112 messages, received %d" % count
 
 	display(f, "\n******* Stopping Component ******")
         sb.stop()

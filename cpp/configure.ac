@@ -18,7 +18,7 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
-AC_INIT(RBDSDecoder, 1.0.0dev0)
+AC_INIT(RBDSDecoder, 1.1.0dev0)
 AM_INIT_AUTOMAKE(nostdinc)
 
 AC_PROG_CC
