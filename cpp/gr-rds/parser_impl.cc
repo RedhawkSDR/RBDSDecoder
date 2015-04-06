@@ -34,7 +34,8 @@
 #include "boost/format.hpp"
 #include <iomanip>
 
-parser_impl::parser_impl(GenericInterface::LoggingInterface *logger, GenericInterface::EventingInterface * eventServer)
+parser_impl::parser_impl(GenericInterface::LoggingInterface *logger, GenericInterface::EventingInterface * eventServer) :
+showType3BNotImplWarning(true), showType4BNotImplWarning(true), showType5NotImplWarning(true), showType6NotImplWarning(true), showType7NotImplWarning(true), showType8BNotImplWarning(true), showType9NotImplWarning(true), showType10NotImplWarning(true), showType11NotImplWarning(true), showType12NotImplWarning(true), showType13NotImplWarning(true), showType15NotImplWarning(true)
 {
 	this->logger = logger;
 	this->eventServer = eventServer;
@@ -283,7 +284,7 @@ void parser_impl::decode_type2(unsigned int *group, bool B){
 
 void parser_impl::decode_type3(unsigned int *group, bool B){
 	if(B) {
-		LOG(LoggingInterface::WARN, "type 3B not implemented yet");
+		notImplementedWarning("3B", showType3BNotImplWarning);
 		return;
 	}
 
@@ -327,7 +328,7 @@ void parser_impl::decode_type3(unsigned int *group, bool B){
 
 void parser_impl::decode_type4(unsigned int *group, bool B){
 	if(B) {
-		LOG(LoggingInterface::WARN, "type 4B not implemented yet");
+		notImplementedWarning("4B", showType4BNotImplWarning);
 		return;
 	}
 
@@ -355,20 +356,20 @@ void parser_impl::decode_type4(unsigned int *group, bool B){
 }
 
 void parser_impl::decode_type5(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 5 not implemented yet" );
+	notImplementedWarning("5", showType5NotImplWarning);
 }
 
 void parser_impl::decode_type6(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 6 not implemented yet");
+	notImplementedWarning("6", showType6NotImplWarning);
 }
 
 void parser_impl::decode_type7(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 7 not implemented yet");
+	notImplementedWarning("7", showType7NotImplWarning);
 }
 
 void parser_impl::decode_type8(unsigned int *group, bool B){
 	if(B) {
-		LOG(LoggingInterface::WARN, "type 8B not implemented yet");
+		notImplementedWarning("8B", showType8BNotImplWarning);
 		return;
 	}
 	bool T = (group[1] >> 4) & 0x1; // 0 = user message, 1 = tuning info
@@ -442,23 +443,23 @@ void parser_impl::decode_optional_content(int no_groups, unsigned long int *free
 }
 
 void parser_impl::decode_type9(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 9 not implemented yet" << std::endl);
+	notImplementedWarning("9", showType9NotImplWarning);
 }
 
 void parser_impl::decode_type10(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 10 not implemented yet" << std::endl);
+	notImplementedWarning("10", showType10NotImplWarning);
 }
 
 void parser_impl::decode_type11(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 11 not implemented yet" << std::endl);
+	notImplementedWarning("11", showType11NotImplWarning);
 }
 
 void parser_impl::decode_type12(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 12 not implemented yet" << std::endl);
+	notImplementedWarning("12", showType12NotImplWarning);
 }
 
 void parser_impl::decode_type13(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 13 not implemented yet" << std::endl);
+	notImplementedWarning("13", showType13NotImplWarning);
 }
 
 void parser_impl::decode_type14(unsigned int *group, bool B){
@@ -537,7 +538,7 @@ void parser_impl::decode_type14(unsigned int *group, bool B){
 }
 
 void parser_impl::decode_type15(unsigned int *group, bool B){
-	LOG(LoggingInterface::WARN, "type 15 not implemented yet");
+	notImplementedWarning("15", showType15NotImplWarning);
 }
 
 void parser_impl::parse(unsigned int * group) {
@@ -636,3 +637,10 @@ void parser_impl::parse(unsigned int * group) {
 	LOG(LoggingInterface::TRACE, hexMsg);
 }
 
+void parser_impl::notImplementedWarning(std::string type, bool notImplementedBoolean) {
+	if (notImplementedBoolean) {
+		LOG(LoggingInterface::WARN, "type " + type + " not implemented yet. This warning will only be displayed once.");
+		notImplementedBoolean = false;
+	}
+	LOG(LoggingInterface::TRACE, "type " + type + " not implemented yet.");
+}

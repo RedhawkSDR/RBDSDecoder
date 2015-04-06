@@ -48,6 +48,7 @@ class RBDSDecoder_i : public RBDSDecoder_base, public virtual EventingInterface,
     	decoder_impl decoder;
     	std::string m_alt_freq, m_clock_time, m_flag_string, m_ps, m_radio_text, m_pi_txt;
     	unsigned int m_pty, m_pi;
+    	bool displayAltFreqUnsupportedMsg, displayClockTimeUnsupportedMsg;
 
         // Function to get an SRI keyword value
         template <typename TYPE> TYPE getKeywordByID(BULKIO::StreamSRI &sri, CORBA::String_member id, bool &valid) {

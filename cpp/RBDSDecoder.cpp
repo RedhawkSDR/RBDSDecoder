@@ -29,7 +29,8 @@ RBDSDecoder_i::RBDSDecoder_i(const char *uuid, const char *label) :
 		chanrf(0),
 		colrf(0),
 		decoder(this, this),
-		m_alt_freq(""), m_clock_time(""), m_flag_string(""), m_ps(""), m_radio_text(""), m_pi_txt(""), m_pty(0), m_pi(0)
+		m_alt_freq(""), m_clock_time(""), m_flag_string(""), m_ps(""), m_radio_text(""), m_pi_txt(""), m_pty(0), m_pi(0),
+		displayAltFreqUnsupportedMsg(true), displayClockTimeUnsupportedMsg(true)
 {
 }
 
@@ -41,12 +42,25 @@ void RBDSDecoder_i::sendMessage(enum TYPE eventType, std::string groupType, std:
 
 	switch (eventType) {
 	case EventingInterface::ALT_FREQ:
-		LOG_INFO(RBDSDecoder_i, "Received unsupported ALT FREQ(" << msg << ") event type.  Ignoring.")
+
+		if (displayAltFreqUnsupportedMsg) {
+			LOG_INFO(RBDSDecoder_i, "Received unsupported ALT FREQ(" << msg << ") event type.  Ignoring message; THIS WILL ONLY BE LOGGED ONCE!");
+			displayAltFreqUnsupportedMsg = false;
+		}
+
+		LOG_TRACE(RBDSDecoder_i, "Received unsupported ALT FREQ(" << msg << ") event type.  Ignoring message");
 		m_alt_freq = msg;
 		return;
 		break;
 	case EventingInterface::CLOCK_TIME:
-		LOG_INFO(RBDSDecoder_i, "Received unsupported CLOCK TIME(" << msg << ") event type.  Ignoring.")
+
+		if (displayClockTimeUnsupportedMsg) {
+			LOG_INFO(RBDSDecoder_i, "Received unsupported CLOCK TIME(" << msg << ") event type.  Ignoring message; THIS WILL ONLY BE LOGGED ONCE!");
+			displayClockTimeUnsupportedMsg = false;
+		}
+
+		LOG_TRACE(RBDSDecoder_i, "Received unsupported CLOCK TIME(" << msg << ") event type.  Ignoring message");
+
 		m_clock_time = msg;
 		return;
 		break;

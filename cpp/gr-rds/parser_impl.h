@@ -46,7 +46,7 @@ private:
 	void reset();
 	double decode_af(unsigned int);
 	void decode_optional_content(int, unsigned long int *);
-
+	void notImplementedWarning(std::string type, bool notImplementedBoolean);
 	void decode_type0( unsigned int* group, bool B);
 	void decode_type1( unsigned int* group, bool B);
 	void decode_type2( unsigned int* group, bool B);
@@ -63,6 +63,7 @@ private:
 	void decode_type13(unsigned int* group, bool B);
 	void decode_type14(unsigned int* group, bool B);
 	void decode_type15(unsigned int* group, bool B);
+
 
 	unsigned int   program_identification;
 	unsigned char  program_type;
@@ -81,6 +82,7 @@ private:
 	bool           static_pty;
 	bool           debug;
 	bool           log;
+	bool           showType3BNotImplWarning, showType4BNotImplWarning, showType5NotImplWarning, showType6NotImplWarning, showType7NotImplWarning, showType8BNotImplWarning, showType9NotImplWarning, showType10NotImplWarning, showType11NotImplWarning, showType12NotImplWarning, showType13NotImplWarning, showType15NotImplWarning;
 	boost::mutex d_mutex;
 };
 
