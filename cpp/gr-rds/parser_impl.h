@@ -39,11 +39,11 @@ public:
 	parser_impl(GenericInterface::LoggingInterface *logger, GenericInterface::EventingInterface * eventServer);
 	~parser_impl();
 	void parse(unsigned int * group);
+	void reset();
 
 private:
 	LoggingInterface *logger;
 	EventingInterface * eventServer;
-	void reset();
 	double decode_af(unsigned int);
 	void decode_optional_content(int, unsigned long int *);
 	void notImplementedWarning(std::string type, bool notImplementedBoolean);
@@ -83,7 +83,6 @@ private:
 	bool           debug;
 	bool           log;
 	bool           showType3BNotImplWarning, showType4BNotImplWarning, showType5NotImplWarning, showType6NotImplWarning, showType7NotImplWarning, showType8BNotImplWarning, showType9NotImplWarning, showType10NotImplWarning, showType11NotImplWarning, showType12NotImplWarning, showType13NotImplWarning, showType15NotImplWarning;
-	boost::mutex d_mutex;
 };
 
 #endif /* INCLUDED_RDS_PARSER_IMPL_H */

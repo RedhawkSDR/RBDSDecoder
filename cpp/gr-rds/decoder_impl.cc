@@ -41,9 +41,10 @@ decoder_impl::~decoder_impl() {
 }
 
 /**
- * Externally callable method to enter_no_sync()
+ * Externally callable method to enter_no_sync() and reset the parser.
  */
 void decoder_impl::reset() {
+	parser.reset();
 	enter_no_sync();
 }
 

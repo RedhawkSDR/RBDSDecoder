@@ -46,8 +46,6 @@ parser_impl::~parser_impl() {
 }
 
 void parser_impl::reset() {
-	boost::mutex::scoped_lock lock(d_mutex);
-
 	memset(radiotext, ' ', sizeof(radiotext));
 	memset(program_service_name, '.', sizeof(program_service_name));
 
