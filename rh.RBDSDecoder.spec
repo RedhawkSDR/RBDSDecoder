@@ -29,7 +29,7 @@ Prefix:         %{_prefix}
 %define _mandir        %{_prefix}/man
 %define _infodir       %{_prefix}/info
 
-Name:           RBDSDecoder
+Name:           rh.RBDSDecoder
 Version:        1.1.0
 Release:        1%{?dist}
 Summary:        Component %{name}
@@ -60,18 +60,20 @@ Component %{name}
 # Implementation cpp
 pushd cpp
 ./reconf
-%define _bindir %{_prefix}/dom/components/RBDSDecoder/cpp
+%define _bindir %{_prefix}/dom/components/rh/RBDSDecoder/cpp
 %configure
 make %{?_smp_mflags}
 popd
+
 
 %install
 rm -rf $RPM_BUILD_ROOT
 # Implementation cpp
 pushd cpp
-%define _bindir %{_prefix}/dom/components/RBDSDecoder/cpp
+%define _bindir %{_prefix}/dom/components/rh/RBDSDecoder/cpp
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -79,9 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,redhawk,redhawk,-)
-%dir %{_prefix}/dom/components/%{name}
-%{_prefix}/dom/components/%{name}/RBDSDecoder.scd.xml
-%{_prefix}/dom/components/%{name}/RBDSDecoder.prf.xml
-%{_prefix}/dom/components/%{name}/RBDSDecoder.spd.xml
-%{_prefix}/dom/components/%{name}/cpp
+%dir %{_prefix}/dom/components/rh/RBDSDecoder
+%{_prefix}/dom/components/rh/RBDSDecoder/RBDSDecoder.scd.xml
+%{_prefix}/dom/components/rh/RBDSDecoder/RBDSDecoder.prf.xml
+%{_prefix}/dom/components/rh/RBDSDecoder/RBDSDecoder.spd.xml
+%{_prefix}/dom/components/rh/RBDSDecoder/cpp
 
