@@ -23,521 +23,494 @@ import unittest
 import ossie.utils.testing
 from ossie.utils import sb
 import time
+import inspect
 
-# A list to hold the responses the message sink
-# receives
-responses = []
-
-# The callback function used by the message sink
-# to store its responses
-def msgCB(msgId, msgStr):
-	responses.append(msgStr)
-
-# A convenience method for printing and logging
-def display(f, string):
-	f.write(string + '\n')
-	print string
 
 # Perform modulo-2 polynomial division (Not as
 # efficient as the method used by the component,
 # but should be more intuitive)
 def polyDivide(dividend, divisor):
-	binDividend = bin(dividend)[2:]
-	binDivisor = bin(divisor)[2:]
-	count = 0
-	remainder = ''
+    binDividend = bin(dividend)[2:]
+    binDivisor = bin(divisor)[2:]
+    count = 0
+    remainder = ''
 
-	while True:
-		difference = len(binDivisor) - len(remainder)
-		remaining = len(binDividend) - count
+    while True:
+        difference = len(binDivisor) - len(remainder)
+        remaining = len(binDividend) - count
 
-		# Enough bits are available to perform
-		# a modulo-2 subtraction
-		if remaining >= difference:
-			remainder += binDividend[count:count+difference]
-			count += difference
-		# Append the rest of the dividend to the
-		# remainder and front pad the result with
-		# zeroes so it's of the correct length		
-		else:
-			remainder += binDividend[count:count+remaining]
-			count += remaining
-			difference -= remaining
+        # Enough bits are available to perform
+        # a modulo-2 subtraction
+        if remaining >= difference:
+            remainder += binDividend[count:count+difference]
+            count += difference
+        # Append the rest of the dividend to the
+        # remainder and front pad the result with
+        # zeroes so it's of the correct length		
+        else:
+            remainder += binDividend[count:count+remaining]
+            count += remaining
+            difference -= remaining
+            remainder = '0' * difference + remainder
+            count += difference
+            break
 
-			remainder = '0' * difference + remainder
-			count += difference
+        # Modulo-2 subtraction = Modulo-2 addition = XOR
+        remainder = bin(int(remainder, 2) ^ divisor)[2:]
+        if count >= len(binDividend):
+            break
 
-			break
-
-		# Modulo-2 subtraction = Modulo-2 addition = XOR
-		remainder = bin(int(remainder, 2) ^ divisor)[2:]
-
-		if count >= len(binDividend):
-			break
-
-	return int(remainder, 2)
+    return int(remainder, 2)
 
 # Convert a number to a binary string with
 # the desired number of bits in the string
 def toBinary(number, count):
-	binNumber = bin(number)[2:]
+    binNumber = bin(number)[2:]
 
-	string = '0' * (count - len(binNumber))
+    string = '0' * (count - len(binNumber))
 
-	string += binNumber
+    string += binNumber
 
-	return string
+    return string
 
 # The calculation used to convert the 16-bit
 # data word into the CRC encoded 26-bit block
 def calculateBlock(m, x_10, generator, offset_word, length = 26):
-	return toBinary((m * x_10) ^ (polyDivide(m * x_10, generator)) ^ offset_word, length)
+    return toBinary((m * x_10) ^ (polyDivide(m * x_10, generator)) ^ offset_word, length)
 
-def main():
-	global responses
-	f = open('unit_test.log', 'w')
+def whoami():
+    return inspect.stack()[1][3]
 
-	display(f, "*********************************")
-        display(f, "***** RBDSDecoder Unit Test *****")
-        display(f, "*********************************")
+class ComponentTests(ossie.utils.testing.ScaComponentTestCase):
 
-	# Launch the component and the input sources and message sink
-	display(f, "\n****** Creating Component *****")
-	test_component = sb.launch('../RBDSDecoder.spd.xml', execparams={'DEBUG_LEVEL':5})
-	binarySource = sb.DataSource()
-	messageSink = sb.MessageSink(messageCallback=msgCB)
+    # Type A message
+    radio_text_64 = "This_is_a_test!1This_is_a_test!2This_is_a_test!3This_is_a_test!_"
+    # Type B message    
+    radio_text_32 = "This_is_a_test!4This_is_a_test!_"
+    # The program identification code for WKLR
+    PI_code = 0x703F
+    
+    # Station Type
+    station_type = 'Classic_Rock'
+    # The Program Service indicated additional information about
+    # the station
+    PS_Name = "TESTING!"
+    
+    call_sign = "WKLR"
+    
+    # The amount of time needed for all the data to go through the system in seconds
+    flushTime = 0.25
 
-	# Connect the output of the output of the binarySource to the
-	# input of the RBDSDecoder.  Connect the output of the 
-	# RBDSDecoder to the input of the message sink
-	display(f, "\n***** Creating Connections *****")
-	binarySource.connect(test_component, providesPortName='dataShort_in')
-	test_component.connect(messageSink, providesPortName='msgIn')
-	display(f, "Connections created")
+    # The callback function used by the message sink
+    # to store its responses
+    def msgCB(self, msgId, msgStr):
+        self.responses.append(msgStr)
 
-	display(f, "\n******** Generating Data ********")
-	# Generate RBDS type 0 and 2 messages
-	dummyBlocks = []
-	typeABlocks = []
-	typeBBlocks = []
-	# RBDS Standard, Annex A, Page 70
-	offset_words = {'A' : int('0b0011111100', 2), 'B' : int('0b0110011000', 2), 'C' : int('0b0101101000', 2), 'C;' : int('0b1101010000', 2), 'D' : int('0b0110110100', 2)}
-	# RBDS Standard, Annex B, Page 71
-	generator_poly = int('0b10110111001', 2)
-	x_10 = int('0b10000000000', 2)
-	# The program identification code for WKLR
-	PI_code = 0x703F
-	# This indicates the group number being sent (only 0 and 2)
-	# supported
-	group_type_code = '0000'
-	# Type A: B0 = 0, Type B: B0 = 1
-	B0 = 0b0
-	# These two bits indicate traffic information (ignored by the
-	# component)
-	TP = 0b0
-	TA = 0b0
-	# Indication of the program type
-	PTY = 0b00110
-	# Speech: M_S = 0, Music: M_S = 1
-	M_S = 0b0
-	# Indication of dynamic PTY and Message (Only message used by
-	# component)
-	DI_segment = 0b100
-	# Alternate frequency information (RBDS Standard, 3.2.1.6.1,
-	# Page 42) Unsupported by Component
-	AF1 = 0x00
-	AF2 = 0x00
-	# The Program Service indicated additional information about
-	# the station
-	PS_Name = "TESTING!"
-	# Used to clear the current radio text if a transition occurs
-	text_AB = 0b0
-	# This indicates where the received characters should be 
-	# placed in the radio text sequence
-	text_address = 0b0000
-	# Type A message
-	radio_text_64 = "This is a test!1This is a test!2This is a test!3This is a test!\r"
-	# Type B message	
-	radio_text_32 = "This is a test!4This is a test!\r"
+    def setUp(self):
+        print "\nSetting up a Test\n"
+        # Generate RBDS type 0 and 2 messages
+        self.dummyBlocks = []
+        self.typeABlocks = []
+        self.typeBBlocks = []
+        # A list to hold the responses the message sink
+        # receives
+        self.responses = []
 
-	# The first blocks will not actually be processed, they're just
-	# for syncing (Really only need two of these, but for completeness,
-	# send an entire group)
-	m = int('0000000000000001', 2)
-	c = calculateBlock(m, x_10, generator_poly, offset_words['A'])
-	for char in c:
-		dummyBlocks.append(int(char))
+        # Launch the component and the input sources and message sink
+        ossie.utils.testing.ScaComponentTestCase.setUp(self)
+        self.launch()
+        self.binarySource = sb.DataSource()
+        self.messageSink = sb.MessageSink(messageCallback=self.msgCB)
+        
+        # Connect the output of the output of the binarySource to the
+        # input of the RBDSDecoder.  Connect the output of the 
+        # RBDSDecoder to the input of the message sink
+        self.binarySource.connect(self.comp, providesPortName='dataShort_in')
+        self.comp.connect(self.messageSink, providesPortName='msgIn')
 
-	c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
-	for char in c:
-		dummyBlocks.append(int(char))
+        self.generateData()
+        
+        # Now that we have all of our data put together push it into the component
+        self.comp.start()
+        self.binarySource.start()
+        self.messageSink.start()
+        
+        # The sample rate is set to 1187.5, which is what a
+        # real RBDS Decoder would anticipate, but this 
+        # component ignores sample rate
+        self.binarySource.push(self.dummyBlocks, False, 'Test', 1187.5, False, [], None)
 
-	c = calculateBlock(m, x_10, generator_poly, offset_words['C'])
-	for char in c:
-		dummyBlocks.append(int(char))
 
-	c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
-	for char in c:
-		dummyBlocks.append(int(char))
+    def tearDown(self):
+        print "\nTearing down a Test\n"
+        self.responses = []
+        self.messageSink.stop()
+        self.binarySource.stop()
+        self.comp.releaseObject()
+        ossie.utils.testing.ScaComponentTestCase.tearDown(self)
 
-	# First try group A blocks, alternating between group 0 and 2
-	while text_address < 16:
-		# The first block in a group is always the same,
-		# regardless of the group type
-		m = PI_code
-		c = calculateBlock(m, x_10, generator_poly, offset_words['A'])
-		for char in c:
-			typeABlocks.append(int(char))
+    def testATypeCount(self):
+        self.binarySource.push(self.typeABlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.typeCountTest()
 
-		if group_type_code == '0000':
-			# Encode the group type, the A/B indicator,
-			# the TP indicator, the Program Type, the
-			# TA indicator, the MS indicator, and the 
-			# Dynamic Information Segment
-			m = int(group_type_code + bin(B0)[2:] + bin(TP)[2:] + toBinary(PTY, 5) + bin(TA)[2:] + bin(M_S)[2:] + toBinary(DI_segment, 3), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
-			for char in c:
-				typeABlocks.append(int(char))
+    def testBTypeCount(self):
+        self.binarySource.push(self.typeBBlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.typeCountTest()
+        
+        
+    def typeCountTest(self):
+        count = 0
+        for response in self.responses:
+            count += 1
+        self.assertTrue(count == 112, "Did not receive expected number of messages, expected 112, received %s" % count)
 
-			# Encode the Alternate Frequency Information
-			m = int(toBinary(AF1, 8) + toBinary(AF2, 8), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['C'])
-		        for char in c:
-		                typeABlocks.append(int(char))
+    def testATypeFullText(self):
+        self.binarySource.push(self.typeABlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.typeFullTextTest(self.radio_text_64)
 
-			# Encode the Program service message
-			m = int(toBinary(int(ord(PS_Name[2 * (DI_segment - 8) + 0])), 8) + toBinary(int(ord(PS_Name[2 * (DI_segment - 8) + 1])), 8), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
-		        for char in c:
-		                typeABlocks.append(int(char))
-			
-			DI_segment = 4 + (DI_segment + 1) % 4
-			group_type_code = '0010'
-		elif group_type_code == '0010':
-			# Encode the group type, the A/B indicator,
-			# the TP indicator, the Program Type, the
-			# text clear flag, and the text address
-			m = int(group_type_code + bin(B0)[2:] + bin(TP)[2:] + toBinary(PTY, 5) + bin(text_AB)[2:] + toBinary(text_address, 4), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
-			for char in c:
-				typeABlocks.append(int(char))
+    def testBTypeFullText(self):
+        self.binarySource.push(self.typeBBlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.typeFullTextTest(self.radio_text_32)
+        
+    def typeFullTextTest(self, matchText):
+        type = "RBDS_Output::Full_Text"
+        print "Running %s" % (whoami())
+        msgReceived = False
+        receivedCorrectText = True
+        
+        for response in self.responses:
+            for item in response.value.value():
+                if item.id == type:
+                    msgReceived = True
+                    for a, b in zip(item.value.value(), matchText):
+                        if a == " ":
+                            break
+                        if a != b:
+                            receivedCorrectText = False
+                        
+        self.assertTrue(msgReceived, "Did not receive any %s message types" % type)
+        self.assertTrue(receivedCorrectText, "One or more %s messages were not correct" % type)
 
-			# Encode two characters of the radio
-			# text
-			m = int(toBinary(int(ord(radio_text_64[text_address * 4 + 0])), 8) + toBinary(int(ord(radio_text_64[text_address * 4 + 1])), 8), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['C'])
-        		for char in c:
-                		typeABlocks.append(int(char))
+    def testAShortText(self):
+        self.binarySource.push(self.typeABlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.shortTextTest()
 
-			# Encode two more characters of the
-			# radio text 
-			m = int(toBinary(int(ord(radio_text_64[text_address * 4 + 2])), 8) + toBinary(int(ord(radio_text_64[text_address * 4 + 3])), 8), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
-        		for char in c:
-                		typeABlocks.append(int(char))
-			
-			text_address += 1
-			group_type_code = '0000'
+    def testBShortText(self):
+        self.binarySource.push(self.typeBBlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.shortTextTest()
 
-	# Now try group B blocks, alternating between group 0 and 2
-	B0 = 0b1
-	# Clear the radio text
-	text_AB = 0b1
-	# Reset the text address
-	text_address = 0b0000
+    def shortTextTest(self):
+        type = "RBDS_Output::Short_Text"
+        print "Running %s" % (whoami())
+        msgReceived = False
+        receivedCorrectText = True
+        
+        for response in self.responses:
+            for item in response.value.value():
+                if item.id == type:
+                    msgReceived = True
+                    for a, b in zip(item.value.value(), self.PS_Name):
+                        if a == ".":
+                            break
+                        if a != b:
+                            receivedCorrectText = False
+                        
+        self.assertTrue(msgReceived, "Did not receive any %s message types" % type)
+        self.assertTrue(receivedCorrectText, "One or more %s messages were not correct" % type)
 
-	while text_address < 16:
-		# The first block in a group is always the same,
-		# regardless of the group type
-		m = PI_code
-		c = calculateBlock(m, x_10, generator_poly, offset_words['A'])
-		for char in c:
-			typeBBlocks.append(int(char))
+    def testAStationType(self):
+        self.binarySource.push(self.typeABlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.stationTypeTest()
+    
+    def testBStationType(self):
+        self.binarySource.push(self.typeBBlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.stationTypeTest()
 
-		if group_type_code == '0000':
-			# Encode the group type, the A/B indicator,
-			# the TP indicator, the Program Type, the
-			# TA indicator, the MS indicator, and the 
-			# Dynamic Information Segment
-			m = int(group_type_code + bin(B0)[2:] + bin(TP)[2:] + toBinary(PTY, 5) + bin(TA)[2:] + bin(M_S)[2:] + toBinary(DI_segment, 3), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
-			for char in c:
-				typeBBlocks.append(int(char))
+    def stationTypeTest(self):
+        type = "RBDS_Output::Station_Type"
+        print "Running %s" % (whoami())
+        msgReceived = False
+        receivedCorrectText = True
 
-			# Type B groups send the PI code again
-			m = PI_code
-			c = calculateBlock(m, x_10, generator_poly, offset_words['C;'])
-			for char in c:
-				typeBBlocks.append(int(char))
+        
+        for response in self.responses:
+            for item in response.value.value():
+                if item.id == type and item.value.value() != "None":
+                    msgReceived = True
+                    for a, b in zip(item.value.value(), self.station_type):
+                        if a == ".":
+                            break
+                        if a != b:
+                            receivedCorrectText = False
+                            
+                        
+        self.assertTrue(msgReceived, "Did not receive any %s message types" % type)
+        self.assertTrue(receivedCorrectText, "One or more %s messages were not correct" % type)
 
-			# Encode the Program service message
-			m = int(toBinary(int(ord(PS_Name[2 * (DI_segment - 8) + 0])), 8) + toBinary(int(ord(PS_Name[2 * (DI_segment - 8) + 1])), 8), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
-		        for char in c:
-		                typeBBlocks.append(int(char))
-			
-			DI_segment = 4 + (DI_segment + 1) % 4
-			group_type_code = '0010'
-		elif group_type_code == '0010':
-			# Encode the group type, the A/B indicator,
-			# the TP indicator, the Program Type, the
-			# text clear flag, and the text address
-			m = int(group_type_code + bin(B0)[2:] + bin(TP)[2:] + toBinary(PTY, 5) + bin(text_AB)[2:] + toBinary(text_address, 4), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
-			for char in c:
-				typeBBlocks.append(int(char))
+    def testACallSign(self):
+        self.binarySource.push(self.typeABlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.callSignTest()
 
-			# Type B groups send the PI code again
-			m = PI_code
-			c = calculateBlock(m, x_10, generator_poly, offset_words['C;'])
-			for char in c:
-				typeBBlocks.append(int(char))
+    def testBCallSign(self):
+        self.binarySource.push(self.typeBBlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.callSignTest()
+        
+    def callSignTest(self):
+        type = "RBDS_Output::Call_Sign"
+        print "Running %s" % (whoami())
+        msgReceived = False
+        receivedCorrectText = True
+        
+        for response in self.responses:
+            for item in response.value.value():
+                if item.id == type:
+                    msgReceived = True
+                    for a, b in zip(item.value.value(), self.call_sign):
+                        if a != b:
+                            receivedCorrectText = False
+                            
+                        
+        self.assertTrue(msgReceived, "Did not receive any %s message types" % type)
+        self.assertTrue(receivedCorrectText, "One or more %s messages were not correct" % type)
 
-			# Encode two characters of the radio
-			# text
-			m = int(toBinary(int(ord(radio_text_32[text_address * 2 + 0])), 8) + toBinary(int(ord(radio_text_32[text_address * 2 + 1])), 8), 2)
-			c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
-        		for char in c:
-                		typeBBlocks.append(int(char))
-			
-			text_address += 1
-			group_type_code = '0000'
+    def testAPIString(self):
+        self.binarySource.push(self.typeABlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.piStringTest()
 
-	display(f, "\n******* Starting Component ******")
-        sb.start()
-	messageSink.start()
-        display(f, "Component started")
-	display(f, "**** Sending Sync Blocks ****")
-	# The sample rate is set to 1187.5, which is what a
-	# real RBDS Decoder would anticipate, but this 
-	# component ignores sample rate
-	binarySource.push(dummyBlocks, False, 'Test', 1187.5, False, [], None)
+    def testBPIString(self):
+        self.binarySource.push(self.typeBBlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.piStringTest()
+        
+    def piStringTest(self):
+        type = "RBDS_Output::PI_String"
+        print "Running %s" % (whoami())
+        msgReceived = False
+        receivedCorrectText = True
+        
+        for response in self.responses:
+            for item in response.value.value():
+                if item.id == type:
+                    msgReceived = True
+                    for a, b in zip(item.value.value(), str(self.PI_code)):
+                        if a != b:
+                            receivedCorrectText = False
 
-	display(f, "** Testing Group 0, Type A **")
-	display(f, "** Testing Group 2, Type A **")
-	binarySource.push(typeABlocks, False, 'Test', 1187.5, False, [], None)
-	time.sleep(0.25)
+        self.assertTrue(msgReceived, "Did not receive any %s message types" % type)
+        self.assertTrue(receivedCorrectText, "One or more %s messages were not correct" % type)
 
-	type_A_count_test = True
-	type_A_full_text_test = True
-	type_A_short_text_test = True
-	type_A_station_test = True
-	type_A_callsign_test = True
-	type_A_pi_test = True
-	type_A_text_flag_test = True
-	type_A_group_num_test = True
+    def testAGroupFlag(self):
+        self.binarySource.push(self.typeABlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.groupFlagTest('A')
 
-	type_A_count_message = ""
-	type_A_full_text_message = ""
-	type_A_short_text_message = ""
-	type_A_station_message = ""
-	type_A_callsign_message = ""
-	type_A_pi_message = ""
-	type_A_text_flag_message = ""
-	type_A_group_num_message = ""
+    def testBGroupFlag(self):
+        self.binarySource.push(self.typeBBlocks, False, 'Test', 1187.5, False, [], None)
+        time.sleep(self.flushTime) # Wait a second for the data to process
+        self.groupFlagTest('B')
 
-	count = 0
+    def groupFlagTest(self, group):
+        type = "RBDS_Output::Group"
+        print "Running %s" % (whoami())
+        msgReceived = False
+        receivedCorrectText = True
+        
+        for response in self.responses:
+            for item in response.value.value():
+                if item.id == type:
+                    msgReceived = True
+                    if (len(item.value.value()) < 3 or item.value.value()[2] != group):
+                            receivedCorrectText = False
 
-	for response in responses:
-		for item in response.value.value():
-			if item.id == 'Full Text':
-				if item.value.value()[count*4:count*4 + 4] != radio_text_64[count*4:count*4 + 4]:
-					type_A_full_text_test = False
-					type_A_full_text_message = "Expected radio text \'%s\', received \'%s\'" % (radio_text_64[:count*4 + 4], item.value.value()[:count*4 + 4])
-			elif item.id == 'Short Text' and count < 4:
-				if item.value.value()[count*2:count*2 + 2] != PS_Name[count*2:count*2 + 2]:
-					type_A_short_text_test = False
-					type_A_short_text_message = "Expected \'%s\', received \'%s\'" % (PS_Name[:count*2 + 2], item.value.value()[:count*2 + 2])
-			elif item.id == 'Station Type':
-				if item.value.value() != 'Classic Rock':
-					type_A_station_test = False
-					type_A_station_message = "Expected station type \'%s\', received \'%s\'" % ('Classic Rock', item.value.value())
-			elif item.id == 'Call_Sign':
-				if item.value.value() != 'WKLR':
-					type_A_callsign_test = False
-					type_A_callsign_message = "Expected callsign \'%s\', received \'%s\'" % ('WKLR', item.value.value())
-			elif item.id == 'PI_String':
-				if item.value.value() != '703F':
-					type_A_pi_test = False
-					type_A_pi_message = "Expected PI code \'%s\', received \'%s\'" % ('703F', item.value.value())
-			elif item.id == 'TextFlag' and count > 0:
-				if item.value.value() != 'A':
-					type_A_text_flag_test = False
-					type_A_text_flag_message = "Expected text flag \'%s\', received \'%s\'" % ('A', item.value.value())
-			elif item.id == 'Group':
-				expected = ''
-				if count % 2 == 0:
-					expected = '0A'
-				else:
-					expected = '2A'
-				if item.value.value() != expected:
-					type_A_group_num_test = False
-					type_A_group_num_message = "Expected Group %s on group number %d, received Group %s" % (expected, count, item.value.value())
-		count += 1
+        self.assertTrue(msgReceived, "Did not receive any %s message types" % type)
+        self.assertTrue(receivedCorrectText, "One or more %s messages were not correct" % type)
 
-	if count != 112:
-		type_A_count_test = False
-		type_A_count_message = "Expected 112 messages, received %d" % count
+    def generateData(self):
+        # RBDS Standard, Annex A, Page 70
+        offset_words = {'A' : int('0b0011111100', 2), 'B' : int('0b0110011000', 2), 'C' : int('0b0101101000', 2), 'C;' : int('0b1101010000', 2), 'D' : int('0b0110110100', 2)}
+        # RBDS Standard, Annex B, Page 71
+        generator_poly = int('0b10110111001', 2)
+        x_10 = int('0b10000000000', 2)
 
-	responses = []
+        # This indicates the group number being sent (only 0 and 2)
+        # supported
+        group_type_code = '0000'
+        # Type A: B0 = 0, Type B: B0 = 1
+        B0 = 0b0
+        # These two bits indicate traffic information (ignored by the
+        # component)
+        TP = 0b0
+        TA = 0b0
+        # Indication of the program type
+        PTY = 0b00110
+        # Speech: M_S = 0, Music: M_S = 1
+        M_S = 0b0
+        # Indication of dynamic PTY and Message (Only message used by
+        # component)
+        DI_segment = 0b100
+        # Alternate frequency information (RBDS Standard, 3.2.1.6.1,
+        # Page 42) Unsupported by Component
+        AF1 = 0x00
+        AF2 = 0x00
+        # Used to clear the current radio text if a transition occurs
+        text_AB = 0b0
+        # This indicates where the received characters should be 
+        # placed in the radio text sequence
+        text_address = 0b0000
+        
+        # The first blocks will not actually be processed, they're just
+        # for syncing (Really only need two of these, but for completeness,
+        # send an entire group)
+        m = int('0000000000000001', 2)
+        c = calculateBlock(m, x_10, generator_poly, offset_words['A'])
+        for char in c:
+            self.dummyBlocks.append(int(char))
+        
+        c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
+        for char in c:
+            self.dummyBlocks.append(int(char))
+        
+        c = calculateBlock(m, x_10, generator_poly, offset_words['C'])
+        for char in c:
+            self.dummyBlocks.append(int(char))
+        
+        c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
+        for char in c:
+            self.dummyBlocks.append(int(char))
+           
+        # First try group A blocks, alternating between group 0 and 2
+        while text_address < 16:
+            # The first block in a group is always the same,
+            # regardless of the group type
+            m = self.PI_code
+            c = calculateBlock(m, x_10, generator_poly, offset_words['A'])
+            for char in c:
+                self.typeABlocks.append(int(char))
 
-	#*************************************************
-	display(f, "** Testing Group 0, Type B **")
-	display(f, "** Testing Group 2, Type B **")
-	binarySource.push(typeBBlocks, False, 'Test', 1187.5, False, [], None)
-	time.sleep(0.25)
+            if group_type_code == '0000':
+                # Encode the group type, the A/B indicator,
+                # the TP indicator, the Program Type, the
+                # TA indicator, the MS indicator, and the 
+                # Dynamic Information Segment
+                m = int(group_type_code + bin(B0)[2:] + bin(TP)[2:] + toBinary(PTY, 5) + bin(TA)[2:] + bin(M_S)[2:] + toBinary(DI_segment, 3), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
+                for char in c:
+                    self.typeABlocks.append(int(char))
 
-	type_B_count_test = True
-	type_B_full_text_test = True
-	type_B_short_text_test = True
-	type_B_station_test = True
-	type_B_callsign_test = True
-	type_B_pi_test = True
-	type_B_text_flag_test = True
-	type_B_group_num_test = True
+                # Encode the Alternate Frequency Information
+                m = int(toBinary(AF1, 8) + toBinary(AF2, 8), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['C'])
+                for char in c:
+                    self.typeABlocks.append(int(char))
 
-	type_B_count_message = ""
-	type_B_full_text_message = ""
-	type_B_short_text_message = ""
-	type_B_station_message = ""
-	type_B_callsign_message = ""
-	type_B_pi_message = ""
-	type_B_text_flag_message = ""
-	type_B_group_num_message = ""
+                # Encode the Program service message
+                m = int(toBinary(int(ord(self.PS_Name[2 * (DI_segment - 8) + 0])), 8) + toBinary(int(ord(self.PS_Name[2 * (DI_segment - 8) + 1])), 8), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
+                for char in c:
+                    self.typeABlocks.append(int(char))
 
-	count = 0
+                DI_segment = 4 + (DI_segment + 1) % 4
+                group_type_code = '0010'
+            elif group_type_code == '0010':
+                # Encode the group type, the A/B indicator,
+                # the TP indicator, the Program Type, the
+                # text clear flag, and the text address
+                m = int(group_type_code + bin(B0)[2:] + bin(TP)[2:] + toBinary(PTY, 5) + bin(text_AB)[2:] + toBinary(text_address, 4), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
+                for char in c:
+                    self.typeABlocks.append(int(char))
 
-	for response in responses:
-		for item in response.value.value():
-			if item.id == 'Full Text':
-				if item.value.value()[count*2:count*2 + 2] != radio_text_32[count*2:count*2 + 2]:
-					type_B_full_text_test = False
-					type_B_full_text_message = "Expected radio text \'%s\', received \'%s\'" % (radio_text_32[:count*2 + 2], item.value.value()[:count*2 + 2])
-			elif item.id == 'Short Text' and count < 4:
-				if item.value.value() != PS_Name:
-					type_B_short_text_test = False
-					type_B_short_text_message = "Expected \'%s\', received \'%s\'" % (PS_Name, item.value.value())
-			elif item.id == 'Station Type':
-				if item.value.value() != 'Classic Rock':
-					type_B_station_test = False
-					type_B_station_message = "Expected station type \'%s\', received \'%s\'" % ('Classic Rock', item.value.value())
-			elif item.id == 'Call_Sign':
-				if item.value.value() != 'WKLR':
-					type_B_callsign_test = False
-					type_B_callsign_message = "Expected callsign \'%s\', received \'%s\'" % ('WKLR', item.value.value())
-			elif item.id == 'PI_String':
-				if item.value.value() != '703F':
-					type_B_pi_test = False
-					type_B_pi_message = "Expected PI code \'%s\', received \'%s\'" % ('703F', item.value.value())
-			elif item.id == 'TextFlag' and count > 0:
-				if item.value.value() != 'B':
-					type_B_text_flag_test = False
-					type_B_text_flag_message = "Expected text flag \'%s\', received \'%s\'" % ('B', item.value.value())
-			elif item.id == 'Group':
-				expected = ''
-				if count % 2 == 0:
-					expected = '0B'
-				else:
-					expected = '2B'
-				if item.value.value() != expected:
-					type_B_group_num_test = False
-					type_B_group_num_message = "Expected Group %s on group number %d, received Group %s" % (expected, count, item.value.value())
-		count += 1
+                # Encode two characters of the radio
+                # text
+                m = int(toBinary(int(ord(self.radio_text_64[text_address * 4 + 0])), 8) + toBinary(int(ord(self.radio_text_64[text_address * 4 + 1])), 8), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['C'])
+                for char in c:
+                    self.typeABlocks.append(int(char))
 
-	if count != 112:
-		type_B_count_test = False
-		type_B_count_message = "Expected 112 messages, received %d" % count
+                # Encode two more characters of the
+                # radio text 
+                m = int(toBinary(int(ord(self.radio_text_64[text_address * 4 + 2])), 8) + toBinary(int(ord(self.radio_text_64[text_address * 4 + 3])), 8), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
+                for char in c:
+                    self.typeABlocks.append(int(char))
 
-	display(f, "\n******* Stopping Component ******")
-        sb.stop()
-        display(f, "Component stopped")
+                text_address += 1
+                group_type_code = '0000'
 
-        # Display the results of the unit test
-	if type_A_count_test:
-		display(f, "\nType A Count Test ...................." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "\nType A Count Test ...................." + u'\u2714'.encode('utf8') + '\t' + type_A_count_message)
+        # Now try group B blocks, alternating between group 0 and 2
+        B0 = 0b1
+        # Clear the radio text
+        text_AB = 0b1
+        # Reset the text address
+        text_address = 0b0000
 
-	if type_A_full_text_test:
-		display(f, "Type A Full Text Test ................" + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type A Full Text Test ................" + u'\u2718'.encode('utf8') + '\t' + type_A_full_text_message)
+        while text_address < 16:
+            # The first block in a group is always the same,
+            # regardless of the group type
+            m = self.PI_code
+            c = calculateBlock(m, x_10, generator_poly, offset_words['A'])
+            for char in c:
+                self.typeBBlocks.append(int(char))
 
-	if type_A_short_text_test:
-		display(f, "Type A Short Text Test ..............." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type A Short Text Test ..............." + u'\u2718'.encode('utf8') + '\t' + type_A_short_text_message)
+            if group_type_code == '0000':
+                # Encode the group type, the A/B indicator,
+                # the TP indicator, the Program Type, the
+                # TA indicator, the MS indicator, and the 
+                # Dynamic Information Segment
+                m = int(group_type_code + bin(B0)[2:] + bin(TP)[2:] + toBinary(PTY, 5) + bin(TA)[2:] + bin(M_S)[2:] + toBinary(DI_segment, 3), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
+                for char in c:
+                    self.typeBBlocks.append(int(char))
 
-	if type_A_station_test:
-		display(f, "Type A Station Type Test.............." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type A Station Type Test ............." + u'\u2718'.encode('utf8') + '\t' + type_A_station_message)
+                # Type B groups send the PI code again
+                m = self.PI_code
+                c = calculateBlock(m, x_10, generator_poly, offset_words['C;'])
+                for char in c:
+                    self.typeBBlocks.append(int(char))
 
-	if type_A_callsign_test:
-		display(f, "Type A Call Sign Test ................" + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type A Call Sign Test ................" + u'\u2718'.encode('utf8') + '\t' + type_A_callsign_message)
+                # Encode the Program service message
+                m = int(toBinary(int(ord(self.PS_Name[2 * (DI_segment - 8) + 0])), 8) + toBinary(int(ord(self.PS_Name[2 * (DI_segment - 8) + 1])), 8), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
+                for char in c:
+                    self.typeBBlocks.append(int(char))
 
-	if type_A_pi_test:
-		display(f, "Type A PI Code Test .................." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type A PI Code Test .................." + u'\u2718'.encode('utf8') + '\t' + type_A_pi_message)
+                DI_segment = 4 + (DI_segment + 1) % 4
+                group_type_code = '0010'
+            elif group_type_code == '0010':
+                # Encode the group type, the A/B indicator,
+                # the TP indicator, the Program Type, the
+                # text clear flag, and the text address
+                m = int(group_type_code + bin(B0)[2:] + bin(TP)[2:] + toBinary(PTY, 5) + bin(text_AB)[2:] + toBinary(text_address, 4), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['B'])
+                for char in c:
+                    self.typeBBlocks.append(int(char))
 
-	if type_A_text_flag_test:
-		display(f, "Type A Text Flag Test ................" + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type A Text Flag Test ................" + u'\u2718'.encode('utf8') + '\t' + type_A_text_flag_message)
+                # Type B groups send the PI code again
+                m = self.PI_code
+                c = calculateBlock(m, x_10, generator_poly, offset_words['C;'])
+                for char in c:
+                    self.typeBBlocks.append(int(char))
 
-	if type_A_group_num_test:
-		display(f, "Type A Group Number Test ............." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type A Short Number Test ............." + u'\u2718'.encode('utf8') + '\t' + type_A_group_num_message)
+                # Encode two characters of the radio
+                # text
+                m = int(toBinary(int(ord(self.radio_text_32[text_address * 2 + 0])), 8) + toBinary(int(ord(self.radio_text_32[text_address * 2 + 1])), 8), 2)
+                c = calculateBlock(m, x_10, generator_poly, offset_words['D'])
+                for char in c:
+                    self.typeBBlocks.append(int(char))
 
-	#**************************************************************************************************************************
-	if type_B_count_test:
-		display(f, "\nType B Count Test ...................." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "\nType B Count Test ...................." + u'\u2714'.encode('utf8') + '\t' + type_B_count_message)
-
-	if type_B_full_text_test:
-		display(f, "Type B Full Text Test ................" + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type B Full Text Test ................" + u'\u2718'.encode('utf8') + '\t' + type_B_full_text_message)
-
-	if type_B_short_text_test:
-		display(f, "Type B Short Text Test ..............." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type B Short Text Test ..............." + u'\u2718'.encode('utf8') + '\t' + type_B_short_text_message)
-
-	if type_B_station_test:
-		display(f, "Type B Station Type Test.............." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type B Station Type Test ............." + u'\u2718'.encode('utf8') + '\t' + type_B_station_message)
-
-	if type_B_callsign_test:
-		display(f, "Type B Call Sign Test ................" + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type B Call Sign Test ................" + u'\u2718'.encode('utf8') + '\t' + type_B_callsign_message)
-
-	if type_B_pi_test:
-		display(f, "Type B PI Code Test .................." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type B PI Code Test .................." + u'\u2718'.encode('utf8') + '\t' + type_B_pi_message)
-
-	if type_B_text_flag_test:
-		display(f, "Type B Text Flag Test ................" + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type B Text Flag Test ................" + u'\u2718'.encode('utf8') + '\t' + type_B_text_flag_message)
-
-	if type_B_group_num_test:
-		display(f, "Type B Group Number Test ............." + u'\u2714'.encode('utf8'))
-	else:
-		display(f, "Type B Short Number Test ............." + u'\u2718'.encode('utf8') + '\t' + type_B_group_num_message)
-
-	display(f, '\n')
-	display(f, "Unit Test Complete")
-	
-	f.close()
+                text_address += 1
+                group_type_code = '0000'
 
 if __name__ == "__main__":
-	main()
+    ossie.utils.testing.main("../RBDSDecoder.spd.xml", impl="cpp") # By default only test the x86_64 implementation

@@ -15,3 +15,4 @@
 */missing
 *.o
 */RBDSDecoder
+tests/*.xml
