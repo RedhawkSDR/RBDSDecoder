@@ -46,6 +46,9 @@ Requires:       redhawk >= 1.10
 BuildRequires:  bulkioInterfaces >= 1.10
 Requires:       bulkioInterfaces >= 1.10
 
+# Allow upgrades from previous package name
+Obsoletes:      RBDSDecoder < 1.1.0
+
 %description
 Component %{name}
  * Commit: __REVISION__
