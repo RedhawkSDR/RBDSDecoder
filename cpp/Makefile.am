@@ -23,10 +23,13 @@ bin_PROGRAMS = RBDSDecoder
 
 xmldir = $(prefix)/dom/components/rh/RBDSDecoder/
 dist_xml_DATA = ../RBDSDecoder.scd.xml ../RBDSDecoder.prf.xml ../RBDSDecoder.spd.xml
-ACLOCAL_AMFLAGS = -I$(OSSIEHOME)/share/aclocal/ossie
+ACLOCAL_AMFLAGS = -I m4 -I${OSSIEHOME}/share/aclocal/ossie
+AUTOMAKE_OPTIONS = subdir-objects
+
 
 
 distclean-local:
+	rm -rf m4
 	rm -f config.*
 	rm -rf autom4te.cache
 	rm -f acinclude.m4

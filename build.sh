@@ -24,9 +24,9 @@ if [ "$1" = "rpm" ]; then
     if [ -e rh.RBDSDecoder.spec ]; then
         mydir=`dirname $0`
         tmpdir=`mktemp -d`
-        cp -r ${mydir} ${tmpdir}/rh.RBDSDecoder-1.1.0
-        tar czf ${tmpdir}/rh.RBDSDecoder-1.1.0.tar.gz --exclude=".svn" -C ${tmpdir} rh.RBDSDecoder-1.1.0
-        rpmbuild -ta ${tmpdir}/rh.RBDSDecoder-1.1.0.tar.gz
+        cp -r ${mydir} ${tmpdir}/rh.RBDSDecoder-2.0.0
+        tar czf ${tmpdir}/rh.RBDSDecoder-2.0.0.tar.gz --exclude=".svn" -C ${tmpdir} rh.RBDSDecoder-2.0.0
+        rpmbuild -ta ${tmpdir}/rh.RBDSDecoder-2.0.0.tar.gz
         rm -rf $tmpdir
     else
         echo "Missing RPM spec file in" `pwd`
@@ -34,6 +34,10 @@ if [ "$1" = "rpm" ]; then
     fi
 else
     for impl in cpp ; do
+        if [ ! -d "$impl" ]; then
+            echo "Directory '$impl' does not exist...continuing"
+            continue
+        fi
         cd $impl
         if [ -e build.sh ]; then
             if [ $# == 1 ]; then
