@@ -4,9 +4,9 @@
 
 This component decodes RBDS data from broadcast FM using the RBDS Standard Specification
 
-## REDHAWK Documentation
-
-REDHAWK Website: [www.redhawkSDR.org](http://www.redhawksdr.org)
+## Installation Instructions
+To build from source, run the `build.sh` script found at the top level directory. To install to $SDRROOT run, `build.sh install` 
+ 
 
 ## Copyrights
 
