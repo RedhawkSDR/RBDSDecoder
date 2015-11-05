@@ -113,6 +113,15 @@ void RBDSDecoder_i::sendMessage(enum TYPE eventType, std::string groupType, std:
 	mess.Station_Type = rbds_pty_table[m_pty];
 	mess.TextFlag = m_flag_string;
 
+	LOG_INFO(RBDSDecoder_i,"Sending RBDS Message: " << std::endl
+	                    << "    Call_Sign: " << mess.Call_Sign << std::endl
+	                    << "    Full_Text: " << mess.Full_Text << std::endl
+	                    << "    Group: " << mess.Group << std::endl
+	                    << "    PI_String: " << mess.PI_String << std::endl
+	                    << "    Short_Text: " << mess.Short_Text << std::endl
+	                    << "    Station_Type: " << mess.Station_Type << std::endl
+	                    << "    TextFlag: " << mess.TextFlag);
+
 	messageEvent_out->sendMessage(mess);
 }
 void RBDSDecoder_i::log(enum LoggingInterface::LEVEL level, std::string msg) {
