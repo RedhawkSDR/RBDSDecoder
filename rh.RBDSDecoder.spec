@@ -31,7 +31,7 @@ Prefix:         %{_prefix}
 
 Name:           rh.RBDSDecoder
 Version:        2.0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Component %{name}
 
 Group:          REDHAWK/Components
@@ -90,4 +90,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/dom/components/rh/RBDSDecoder/RBDSDecoder.prf.xml
 %{_prefix}/dom/components/rh/RBDSDecoder/RBDSDecoder.spd.xml
 %{_prefix}/dom/components/rh/RBDSDecoder/cpp
+
+%changelog
+* Wed Jun 21 2017 Ryan Bauman <rbauman@lgsinnovations.com> - 2.0.1-2
+- Mass rebuild for REDHAWK 2.1.1
 
